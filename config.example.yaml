@@ -1,0 +1,92 @@
+# qqagent configuration (M1)
+# Copy to config.yaml, fill in the environment variables, then run:
+#   export LLM_API_KEY=...
+#   export SNOWLUMA_WS_TOKEN=...
+#   export SNOWLUMA_HTTP_TOKEN=...
+#   qqagent config check -c config.yaml
+#   qqagent run -c config.yaml
+
+agent:
+  data_dir: ./data
+  log_level: INFO
+  log_format: text          # text | json
+  timezone: Asia/Shanghai
+
+onebot:
+  # SnowLuma Docker defaults
+  ws_url: ws://127.0.0.1:3001
+  http_url: http://127.0.0.1:3000
+  # Separate tokens are supported because SnowLuma may generate different
+  # tokens for the WebSocket server and the HTTP API.
+  ws_token: ${SNOWLUMA_WS_TOKEN:-}
+  http_token: ${SNOWLUMA_HTTP_TOKEN:-}
+  connect_timeout: 10
+  request_timeout: 15
+  send_timeout: 60
+
+llm:
+  base_url: https://api.deepseek.com/v1
+  api_key: ${LLM_API_KEY}
+  model: deepseek-chat
+  temperature: 0.8
+  max_tokens: 800
+  timeout: 60
+  max_tool_rounds: 6
+  # If the model returns plain text and never calls send_message, send that
+  # text anyway. Off by default to preserve the "silence is allowed" behavior.
+  fallback_send_text: false
+
+persona:
+  name: 小助手
+  # system_prompt is optional. If omitted, the built-in group-chat prompt
+  # (defined in src/qqagent/config.py) is used.
+  # system_prompt: |
+  #   你是一个 QQ 群里的 AI 群友……
+
+context:
+  max_messages: 40
+  max_chars: 24000
+  retention_days: 7
+
+trigger:
+  default: mention          # mention | keyword | always
+  keywords: []
+  # Fail-closed by default: add the group IDs the bot may participate in.
+  allowed_groups: []
+  allow_all_groups: false
+  allow_private: false
+  cooldown_seconds: 10
+  groups: {}
+  # Per-group override example:
+  # groups:
+  #   "123456789":
+  #     enabled: true
+  #     mode: keyword
+  #     keywords: ["小助手", "机器人"]
+
+limits:
+  send_per_minute: 6
+  send_per_hour: 40
+  min_delay_ms: 300
+  max_delay_ms: 1200
+  dedupe_window_ms: 8000
+  max_message_chars: 500
+
+extensions:
+  paths: [./extensions]
+  # Empty means "load manifests whose [extension].enabled is true".
+  # The bundled example is disabled by default; enable it with: [example]
+  enabled: []
+  isolation: shared
+  host:
+    memory_limit_mb: 384
+    nofile: 256
+    nproc: 32
+    hook_timeout_ms: 2000
+    tool_timeout_ms: 10000
+    start_timeout_ms: 10000
+    max_concurrency_per_extension: 4
+    hard_timeout_kill_host: true
+    max_crashes: 3
+    crash_window_seconds: 300
+    watchdog_interval_seconds: 5

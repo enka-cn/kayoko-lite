@@ -1,0 +1,34 @@
+# SnowLuma is a separate third-party project with its own source-available,
+# non-commercial license. This file only documents a compatible deployment;
+# it does not bundle SnowLuma. Review its license before use.
+#
+# Ports are bound to 127.0.0.1 on purpose. Use SSH tunnels:
+#   ssh -L 6081:127.0.0.1:6081 -L 5099:127.0.0.1:5099 <server>
+#   6081 = noVNC (QR login), 5099 = SnowLuma WebUI
+#   3000 = OneBot HTTP, 3001 = OneBot WebSocket
+
+services:
+  snowluma:
+    image: motricseven7/snowluma:latest
+    container_name: snowluma
+    restart: unless-stopped
+    shm_size: 1gb
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      SNOWLUMA_WEBUI_HOST: 0.0.0.0
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 1048576
+    ports:
+      - "127.0.0.1:6081:6081"
+      - "127.0.0.1:5099:5099"
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./data/snowluma/data:/app/data
+      - ./data/snowluma/config:/app/.config
+      - ./data/snowluma/local:/app/.local/share

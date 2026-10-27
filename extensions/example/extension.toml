@@ -1,0 +1,16 @@
+[extension]
+id = "example"
+version = "0.1.0"
+api_version = 1
+kind = "plugin"
+enabled = false
+priority = 100
+description = "M1 sample extension: hook, tool, prompt fragment and storage"
+
+[permissions]
+storage = true
+message_send = false
+onebot = ["get_group_info"]
+
+[config]
+greeting = "hello from example"
